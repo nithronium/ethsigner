@@ -66,7 +66,7 @@ public class EthSignResultProvider implements ResultProvider<String> {
     final String prepender = (char) 25 + "Ethereum Signed Message:\n32";
     final byte[] prependerByteArray = prepender.getBytes(StandardCharsets.UTF_8);
     final byte[] myData = new byte[32];
-    for (int i=0; i<32; i+=2) {
+    for (int i=0; i<64; i+=2) {
       myData[i/2] = (byte) ((Character.digit(originalMessage.charAt(i),16) << 4) + Character.digit(originalMessage.charAt(i+1),16));
     }
     final byte[] c = new byte[prependerByteArray.length + myData.length];
