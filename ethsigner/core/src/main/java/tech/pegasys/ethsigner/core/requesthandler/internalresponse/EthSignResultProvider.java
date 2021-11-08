@@ -62,25 +62,31 @@ public class EthSignResultProvider implements ResultProvider<String> {
 
     final Signer signer = transactionSigner.get();
     final String originalMessage = params.get(1);
-    //Added hex part
-    final String prepender = (char) 25 + "Ethereum Signed Message:\n32";
-    final byte[] prependerByteArray = prepender.getBytes(StandardCharsets.UTF_8);
-    final byte[] myData = new byte[32];
-    for (int i=0; i<64; i+=2) {
-      myData[i/2] = (byte) ((Character.digit(originalMessage.charAt(i),16) << 4) + Character.digit(originalMessage.charAt(i+1),16));
+    
+    final String firstTwoChars = originalMessage.length() < 2 ? originalMessage : originalMessage.substring(0,2);
+
+    if(firstTwoChars == "0x") {
+      final String hexMessage = originalMessage.substring(2,originalMessage.length());
+      final String prepender = (char) 25 + "Ethereum Signed Message:\n32";
+      final byte[] prependerByteArray = prepender.getBytes(StandardCharsets.UTF_8);
+      final byte[] myData = new byte[hexMessage.length()/2];
+
+      for (int i=0; i<hexMessage.length(); i+=2) {
+        myData[i/2] = 
+        (byte) ((Character.digit(hexMessage.charAt(i),16) << 4) + Character.digit(hexMessage.charAt(i+1),16));
+      }
+
+      final byte[] c = new byte[prependerByteArray.length + myData.length];
+      System.arraycopy(prependerByteArray,0,c,0,prependerByteArray.length);
+      System.arraycopy(myData,0,c,prependerByteArray.length,myData.length);
+         
+      final Signature signature = signer.sign(c);
+    } else {
+      final String message =
+      (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length + originalMessage;
+
+      final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
     }
-    final byte[] c = new byte[prependerByteArray.length + myData.length];
-    System.arraycopy(prependerByteArray,0,c,0,prependerByteArray.length);
-    System.arraycopy(myData,0,c,prependerByteArray.length,myData.length);
-    
-            
-    final Signature signature = signer.sign(c);
-    
-    /*final String message =
-        (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length + originalMessage;*/
-    
-    
-    //final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
 
     final Bytes outputSignature =
         Bytes.concatenate(
