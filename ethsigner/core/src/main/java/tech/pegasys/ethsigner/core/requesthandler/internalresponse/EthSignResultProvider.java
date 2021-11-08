@@ -83,7 +83,7 @@ public class EthSignResultProvider implements ResultProvider<String> {
       final Signature signature = signer.sign(c);
     } else {
       final String message =
-      (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length + originalMessage;
+      (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
 
       final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
     }
